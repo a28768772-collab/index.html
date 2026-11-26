@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Finder - Find Your Dream Job</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f7fc;color:#17233b}
+header{background:#102d59;color:white;padding:17px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-size:25px;font-weight:bold}
+.logo span{color:#55c4ff}
+nav{display:flex;gap:15px;flex-wrap:wrap}
+nav a{color:white;text-decoration:none;font-size:14px}
+button{border:0;border-radius:8px;padding:11px 16px;cursor:pointer;font-weight:bold}
+.primary{background:#1769e0;color:white}
+.secondary{background:#e7efff;color:#1457b5}
+.hero{background:linear-gradient(120deg,#102d59,#1769c9);color:white;text-align:center;padding:55px 15px 45px}
+.hero h1{font-size:36px;margin:0 0 12px}
+.hero p{color:#dceaff}
+.search{background:white;max-width:850px;margin:25px auto 0;padding:12px;border-radius:12px;display:flex;gap:10px;flex-wrap:wrap}
+.search input,.search select{flex:1;min-width:130px;border:1px solid #ddd;border-radius:7px;padding:13px;font-size:14px;outline:none}
+.container{max-width:1100px;margin:auto;padding:28px 16px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}
+.stat,.job,.panel{background:white;padding:19px;border-radius:12px;box-shadow:0 3px 15px #152d5910}
+.stat{text-align:center}
+.stat strong{font-size:25px;color:#1769e0;display:block}
+.jobs{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:18px}
+.job h3{margin:10px 0;color:#15376c}
+.company{color:#65738a;font-size:14px}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.tag{background:#edf3ff;color:#245ba5;padding:6px 9px;border-radius:5px;font-size:12px}
+.salary{font-weight:bold;color:#13814c}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.empty{text-align:center;padding:35px;background:white;border-radius:12px;color:#667}
+.panel{margin-top:25px}
+.panel input,.panel select,.panel textarea,.modal input,.modal textarea{
+width:100%;padding:12px;border:1px solid #d6deea;border-radius:7px;margin:6px 0 13px;font-size:14px
+}
+label{font-size:13px;font-weight:bold}
+footer{background:#102d59;color:#dceaff;text-align:center;padding:25px;margin-top:35px}
+.modal-bg{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:15px;z-index:10}
+.modal{background:white;width:100%;max-width:480px;max-height:90vh;overflow:auto;padding:23px;border-radius:13px}
+.modal h2{margin-top:0}
+.close{float:right;background:#eee}
+.notice{font-size:12px;color:#68758a;line-height:1.6}
+@media(max-width:650px){
+.hero h1{font-size:28px}
+.jobs{grid-template-columns:1fr}
+.stats{gap:7px}
+.stat{padding:12px 5px}
+.stat strong{font-size:20px}
+header{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">JOB <span>FINDER</span></div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#jobs">Find Jobs</a>
+    <a href="#post">Post Job</a>
+    <a href="#about">About</a>
+  </nav>
+</header>
+
+<section class="hero" id="home">
+  <h1>Find Your Dream Job</h1>
+  <p>आपकी पसंद की नौकरी, आपके अपने शहर में।</p>
+  <div class="search">
+    <input id="keyword" placeholder="Job का नाम लिखें...">
+    <input id="location" placeholder="शहर या राज्य">
+    <select id="category">
+      <option value="">All Categories</option>
+      <option>Government</option>
+      <option>Private</option>
+      <option>IT</option>
+      <option>Driver</option>
+      <option>Teaching</option>
+      <option>Sales</option>
+      <option>Other</option>
+    </select>
+    <button class="primary" onclick="searchJobs()">Search Jobs</button>
+  </div>
+</section>
+
+<main class="container">
+  <div class="stats">
+    <div class="stat"><strong id="totalJobs">0</strong>Available Jobs</div>
+    <div class="stat"><strong>All India</strong>Job Locations</div>
+    <div class="stat"><strong>24/7</strong>Search Anytime</div>
+  </div>
+
+  <section id="jobs">
+    <div class="section-title">
+      <h2>Latest Jobs</h2>
+      <button class="secondary" onclick="resetSearch()">Show All Jobs</button>
+    </div>
+    <div class="jobs" id="jobList"></div>
+  </section>
+
+  <section class="panel" id="post">
+    <h2>🏢 Post a New Job</h2>
+    <p class="notice">कंपनी या नियोक्ता अपनी नौकरी की जानकारी यहाँ डाल सकते हैं। पोस्ट करने से पहले जानकारी सही जाँच लें।</p>
+    <form id="jobForm">
+      <label>Job Title *</label>
+      <input id="jobTitle" required placeholder="जैसे: Office Assistant">
+      <label>Company Name *</label>
+      <input id="company" required placeholder="Company का नाम">
+      <label>Location *</label>
+      <input id="jobLocation" required placeholder="शहर, राज्य">
+      <label>Salary</label>
+      <input id="salary" placeholder="जैसे: ₹15,000 - ₹20,000">
+      <label>Category</label>
+      <select id="jobCategory">
+        <option>Private</option><option>Government</option>
+        <option>IT</option><option>Driver</option>
+        <option>Teaching</option><option>Sales</option><option>Other</option>
+      </select>
+      <label>Qualification</label>
+      <input id="qualification" placeholder="जैसे: 12th Pass / Graduate">
+      <label>Job Description *</label>
+      <textarea id="description" required rows="3" placeholder="नौकरी की पूरी जानकारी"></textarea>
+      <label>Apply WhatsApp Number (Country code सहित)</label>
+      <input id="employerWhatsapp" placeholder="जैसे: 919876543210">
+      <label>Application Email (वैकल्पिक)</label>
+      <input id="employerEmail" type="email" placeholder="company@example.com">
+      <button class="primary" type="submit">+ Publish Job</button>
+    </form>
+  </section>
+
+  <section class="panel" id="about">
+    <h2>About Job Finder</h2>
+    <p>Job Finder एक जॉब सर्च प्लेटफॉर्म है। यहाँ उम्मीदवार नौकरी खोज सकते हैं और कंपनियाँ नौकरी की जानकारी प्रकाशित कर सकती हैं। आवेदन करने से पहले कंपनी और नौकरी की जानकारी की जाँच अवश्य करें। नौकरी पाने के नाम पर किसी को पैसे न दें।</p>
+  </section>
+
+  <section class="panel">
+    <h2>My Applications (इस डिवाइस पर)</h2>
+    <div id="myApplications" class="notice">अभी कोई आवेदन सेव नहीं है।</div>
+  </section>
+</main>
+
+<footer>
+  <h3>JOB FINDER</h3>
+  <p>Find Jobs • Apply Online • Build Your Future</p>
+  <p>© 2026 Job Finder. All Rights Reserved.</p>
+</footer>
+
+<div class="modal-bg" id="applyModal">
+  <div class="modal">
+    <button class="close" onclick="closeApply()">✕</button>
+    <h2>Apply for Job</h2>
+    <p id="applyJobName"></p>
+    <form id="applyForm">
+      <input type="hidden" id="applyJobId">
+      <label>Your Name *</label>
+      <input id="applicantName" required placeholder="पूरा नाम">
+      <label>Mobile Number *</label>
+      <input id="applicantPhone" required type="tel" pattern="[0-9+ ]{8,16}" placeholder="मोबाइल नंबर">
+      <label>Email</label>
+      <input id="applicantEmail" type="email" placeholder="Email">
+      <label>Qualification</label>
+      <input id="applicantQualification" placeholder="आपकी पढ़ाई">
+      <label>Resume Link (वैकल्पिक)</label>
+      <input id="resume" type="url" placeholder="Google Drive या Resume Link">
+      <button class="primary" type="submit">Submit Application</button>
+    </form>
+    <p class="notice">डेमो वर्जन: आपका आवेदन इसी ब्राउज़र में सेव होगा, कंपनी तक अपने आप नहीं पहुँचेगा।</p>
+  </div>
+</div>
+
+<script>
+const sampleJobs = [
+ {id:1,title:"Office Assistant",company:"ABC Services",location:"Delhi",salary:"₹15,000 - ₹20,000",category:"Private",qualification:"12th Pass",description:"ऑफिस के दैनिक कार्य और रिकॉर्ड मैनेज करना।",whatsapp:"",email:""},
+ {id:2,title:"Computer Operator",company:"Digital Solutions",location:"Chandigarh",salary:"₹18,000 - ₹25,000",category:"IT",qualification:"12th / Computer Knowledge",description:"कंप्यूटर पर डाटा एंट्री और ऑफिस का काम।",whatsapp:"",email:""},
+ {id:3,title:"Delivery Driver",company:"Fast Logistics",location:"Punjab",salary:"₹16,000 - ₹22,000",category:"Driver",qualification:"Valid Driving Licence",description:"डिलीवरी और ट्रांसपोर्ट से संबंधित कार्य।",whatsapp:"",email:""},
+ {id:4,title:"Sales Executive",company:"Retail Company",location:"Haryana",salary:"₹14,000 - ₹22,000",category:"Sales",qualification:"12th Pass",description:"ग्राहकों से संपर्क और बिक्री का कार्य।",whatsapp:"",email:""}
+];
+
+function getJobs(){
+ try{
+  const data=JSON.parse(localStorage.getItem("jf_jobs"));
+  return Array.isArray(data)?data:sampleJobs;
+ }catch(e){return sampleJobs;}
+}
+function saveJobs(jobs){localStorage.setItem("jf_jobs",JSON.stringify(jobs));}
+
+let jobs=getJobs();
+
+function renderJobs(list=jobs){
+ document.getElementById("totalJobs").textContent=list.length;
+ const box=document.getElementById("jobList");
+ if(!list.length){
+  box.innerHTML='<div class="empty">कोई नौकरी नहीं मिली। दूसरी सर्च करके देखें।</div>';
+  return;
+ }
+ box.innerHTML=list.map(j=>`
+ <article class="job">
+  <span class="tag">${escapeHTML(j.category||"Other")}</span>
+  <h3>${escapeHTML(j.title)}</h3>
+  <div class="company">🏢 ${escapeHTML(j.company)}</div>
+  <p>📍 ${escapeHTML(j.location)}</p>
+  <p class="salary">💰 ${escapeHTML(j.salary||"Salary Not Disclosed")}</p>
+  <p>🎓 ${escapeHTML(j.qualification||"Not Specified")}</p>
+  <p>${escapeHTML(j.description)}</p>
+  <div class="actions">
+   <button class="primary" onclick="openApply(${Number(j.id)})">Apply Online</button>
+   ${j.whatsapp?`<button class="secondary" onclick="whatsappApply(${Number(j.id)})">WhatsApp Apply</button>`:""}
+  </div>
+ </article>`).join("");
+}
+
+function escapeHTML(value){
+ return String(value??"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+function searchJobs(){
+ const k=document.getElementById("keyword").value.toLowerCase().trim();
+ const l=document.getElementById("location").value.toLowerCase().trim();
+ const c=document.getElementById("category").value;
+ const result=jobs.filter(j=>
+  (!k||(j.title+" "+j.company+" "+j.description).toLowerCase().includes(k))&&
+  (!l||j.location.toLowerCase().includes(l))&&
+  (!c||j.category===c)
+ );
+ renderJobs(result);
+ document.getElementById("jobs").scrollIntoView({behavior:"smooth"});
+}
+
+function resetSearch(){
+ document.getElementById("keyword").value="";
+ document.getElementById("location").value="";
+ document.getElementById("category").value="";
+ renderJobs();
+}
+
+document.getElementById("jobForm").addEventListener("submit",function(e){
+ e.preventDefault();
+ const job={
+  id:Date.now(),
+  title:jobTitle.value.trim(),
+  company:company.value.trim(),
+  location:jobLocation.value.trim(),
+  salary:salary.value.trim(),
+  category:jobCategory.value,
+  qualification:qualification.value.trim(),
+  description:description.value.trim(),
+  whatsapp:employerWhatsapp.value.replace(/\D/g,""),
+  email:employerEmail.value.trim()
+ };
+ jobs.unshift(job);
+ saveJobs(jobs);
+ this.reset();
+ renderJobs();
+ alert("Job पोस्ट हो गई! यह अभी इसी ब्राउज़र में सेव है।");
+ document.getElementById("jobs").scrollIntoView({behavior:"smooth"});
+});
+
+function openApply(id){
+ const j=jobs.find(x=>x.id===id);
+ if(!j)return;
+ document.getElementById("applyJobId").value=id;
+ document.getElementById("applyJobName").textContent=j.title+" - "+j.company;
+ document.getElementById("applyModal").style.display="flex";
+}
+function closeApply(){
+ document.getElementById("applyModal").style.display="none";
+}
+
+document.getElementById("applyForm").addEventListener("submit",function(e){
+ e.preventDefault();
+ const application={
+  jobId:document.getElementById("applyJobId").value,
+  jobName:document.getElementById("applyJobName").textContent,
+  name:document.getElementById("applicantName").value.trim(),
+  phone:document.getElementById("applicantPhone").value.trim(),
+  email:document.getElementById("applicantEmail").value.trim(),
+  qualification:document.getElementById("applicantQualification").value.trim(),
+  resume:document.getElementById("resume").value.trim(),
+  date:new Date().toLocaleDateString()
+ };
+ const list=JSON.parse(localStorage.getItem("jf_applications")||"[]");
+ list.push(application);
+ localStorage.setItem("jf_applications",JSON.stringify(list));
+ this.reset();
+ closeApply();
+ renderApplications();
+ alert("आपका डेमो आवेदन इस डिवाइस में सेव हो गया है।");
+});
+
+function whatsappApply(id){
+ const j=jobs.find(x=>x.id===id);
+ if(!j||!j.whatsapp)return;
+ const message="नमस्ते, मैं "+j.title+" की नौकरी के लिए आवेदन करना चाहता/चाहती हूँ।";
+ window.open("https://wa.me/"+j.whatsapp+"?text="+encodeURIComponent(message),"_blank");
+}
+
+function renderApplications(){
+ const list=JSON.parse(localStorage.getItem("jf_applications")||"[]");
+ const box=document.getElementById("myApplications");
+ if(!list.length){
+  box.textContent="अभी कोई आवेदन सेव नहीं है।";
+  return;
+ }
+ box.innerHTML=list.map(a=>`
+ <p><b>${escapeHTML(a.jobName)}</b><br>
+ ${escapeHTML(a.name)} • ${escapeHTML(a.date)}</p><hr>`).join("");
+}
+
+renderJobs();
+renderApplications();
+</script>
+</body>
+</html>
